@@ -124,7 +124,7 @@ def getNotebookSourceAndOutput(noteBookPath):
 
 def main():
     #specify the location of the home directories
-    HOME_DIRS = 'home'
+    HOME_DIRS = '/home'
     D0101_01_expectedOutputs = ['47.18181818181818', '2194324.4545454546', '0.5', '0.005950963947465129', '3.8531269947891365']
 
     expectedOutput = D0101_01_expectedOutputs

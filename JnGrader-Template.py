@@ -2,21 +2,28 @@ import JnGrader
 
 def main():
     
-    notebookPath = 'Current-Course-Materials/assignments/D0113.02-dual-operand_math_1/D0113.02-dual-operand_math_1.ipynb'
+    # baseHomeDir='/home', 
+    notebookPath = 'Current-Course-Materials/assignments/Dxxx/Dxxx.ipynb'
     compareSources = False    #always a string
     compareOutputs = False
-    outputType = float    #set to int, float or str (matters only if comparing outputs)
-    expectedSources = ['Q1_Ans = 3', 'Q2_Ans = 3', 'Q3_Ans = 6', 'Q4_Ans = 1', 'Q5_Ans = 7', 'Q6_Ans = 2', 'Q7_Ans = 8', 'Q8_Ans = 3', 'Q9_Ans = 2', 'Q10_Ans = 6']
+    outputType = str    #set to int, float or str (matters only if comparing outputs)
+    # floatTolerancePct = 0.00001, #how far can answer deviate from expected value (0.01 = 1%)
+    expectedSources = []
     expectedOutputs = []
-    studentIDsFile = 'su2020StudentList.txt'
+    # studentIDsFile = 'idFile.txt'
 
-    studentGrades = JnGrader.grade( notebookPath = notebookPath,
+
+    studentGrades = JnGrader.grade( 
+                          # baseHomeDir = baseHomeDir,
+                          notebookPath = notebookPath,
                           compareSources = compareSources,
                           compareOutputs = compareOutputs,
                           outputType = outputType,
+                          # floatTolerancePct = floatTolerancePct,
                           expectedSources = expectedSources,
                           expectedOutputs = expectedOutputs,
-                          studentIDsFile = studentIDsFile)
-    
-            
+                          # studentIDsFile = studentIDsFile
+                            )
+
+         
 main()
