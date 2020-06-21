@@ -2,6 +2,69 @@ import os
 import json
 import sys
 
+
+def splitLine(text, width):
+    x = text.split('\n')
+    if len(x[0]) <= width:
+        #if len(x[0]) == 0:
+        #    return x[0], ''
+        return x[0], '\n'.join(x[1:])
+    
+    #here, no '\n' was found in the first width characters
+    #search for the last space in the first <width> characters of the text.
+    firstWidthChars = text[:width+1]
+    lastSpaceLoc = firstWidthChars.rfind(' ')
+    #if we don't find a ' ', break the line at location <width-1>
+    if lastSpaceLoc == -1:
+        return text[:width], text[width:]
+    elif lastSpaceLoc == len(text)-1:
+        return text[:lastSpaceLoc],None
+    else:
+        return text[:lastSpaceLoc], text[lastSpaceLoc+1:]
+
+
+def column(text, width):
+    '''this function formats the supplied text to fit into a column
+of the specied width.'''
+    outText = ''
+    while len(text) > width:
+        x = splitLine(text, width)
+        outText += x[0] + '\n'
+        text = x[1]
+        #print(text)
+    outText += text
+
+    return outText
+
+
+def makeColumns(texts, widths, separator='|'):
+    output = ''
+    textColumnsLists = []
+    for index in range(len(texts)):
+        textColumnsLists.append(column(texts[index], widths[index]).split('\n'))
+
+    maxLines = 0
+    for colList in textColumnsLists:
+        if len(colList) > maxLines:
+            maxLines = len(colList)
+
+    for index in range(maxLines):
+        line = ''
+        for colListIndex in range(len(textColumnsLists)):
+            if len(textColumnsLists[colListIndex]) > index:
+                line += textColumnsLists[colListIndex][index]
+                line += ' '*(widths[colListIndex] - len(textColumnsLists[colListIndex][index]))
+            else:
+                line += ' '*widths[colListIndex]
+            #skip the trailing separator
+            if colListIndex < len(widths)-1:
+                line += separator   
+        output += line + '\n'
+    return output
+            
+            
+            
+
 #global dictionary to hold email->studet name dictionary
 loginIDs = None
 
@@ -31,6 +94,7 @@ def getStudentNamesAndDirs(homeDir):
     userDirs = []
     #get a list of all directories in the home dir
     dirEntries = os.listdir(homeDir)
+    dirEntries.sort()
     for dirEntry in dirEntries:
         entryPath = homeDir+'/'+dirEntry
         if os.path.isdir(entryPath):
@@ -128,8 +192,10 @@ def grade(baseHomeDir='/home',
 
     grades = []    #list of names and grades
     
+    
     for nameAndDir in studentNamesAndDirs:
-        #print(nameAndDir[0])
+        print('='*100)
+        print(str(nameAndDir[0]).upper())
         studentNotebook = nameAndDir[1] + '/' + notebookPath
         #print (studentNotebook)
         sourceAndOutput = getNotebookSourceAndOutput(studentNotebook)
@@ -138,6 +204,9 @@ def grade(baseHomeDir='/home',
         i = 0
         grade = 0
         for item in sourceAndOutput:
+            sourceStr = ''
+            outputStr = ''
+
             #initialize 2 variables in case the student input does not match the expected values
             printedExpectedSource = ''
             printedExpectedOutput = ''
@@ -148,14 +217,16 @@ def grade(baseHomeDir='/home',
                     #item[0] are sources
                     if item[0].split('=')[1] == expectedSources[i].split('=')[1]:
                         grade += 1
+                        printedExpectedSource += 'ok\n'
                     else:
-                        printedExpectedSource = '[Expected:' + expectedSources[i].split('=')[1] + ']'
+                        printedExpectedSource += '[Expected]\n' + expectedSources[i].split('=')[1] + '\n'
                 except:
                     #just do a direct comparison
                     if item[0] == expectedSources[i]:
                         grade += 1
+                        printedExpectedSource += 'ok\n'
                     else:
-                        printedExpectedSource = '[Expected:' + expectedSources[i] + ']'
+                        printedExpectedSource += '[Expected]\n' + expectedSources[i] + '\n'
 
                         
             if compareOutputs == True:    #are we comparing output cells?
@@ -163,10 +234,12 @@ def grade(baseHomeDir='/home',
                     try:
                         if int(item[1]) == int(expectedOutputs[i]):
                             grade += 1
+                            printedExpectedOutput += 'ok\n'
                         else:
-                            printedExpectedOutput = '[Expected:' + str(int(expectedOutputs[i])) + ']'
+                            printedExpectedOutput += '[Expected]\n' + str(int(expectedOutputs[i])) + '\n'
                     except:
-                        print ('Could not convert to int:',  sys.exc_info()[0])
+                        #print ('Could not convert to int:',  sys.exc_info()[0])
+                        outputStr += 'Could not convert to int: ' + sys.exc_info()[0] + '\n'
                         
                 elif outputType == float:    #float outputs
                     try:
@@ -175,46 +248,42 @@ def grade(baseHomeDir='/home',
                         err = abs((expectedValue - actualValue)/expectedValue)
                         
                         if err < floatTolerancePct:
+                            printedExpectedOutput += 'ok\n'
                             grade += 1
                         else:
-                            printedExpectedOutput = '[Expected:' + str(float(expectedOutputs[i])) + ']'
+                            printedExpectedOutput += '[Expected]\n' + str(float(expectedOutputs[i])) + '\n'
 
                     except:
-                        print ('Could not convert to float:',  sys.exc_info()[0])
+                        #print ('Could not convert to float:',  sys.exc_info()[0])
+                        outputStr += 'Could not convert to float: ' + sys.exc_info()[0] + '\n'
                         
                 else:    #string outputs
                     if item[1] == expectedOutputs[i]:
+                        printedExpectedOutput += '\n'
                         grade += 1
+                        printedExpectedOutput += 'ok\n'
                     else:
-                        printedExpectedOutput = '[Expected:' + expectedOutputs[i] + ']'
+                        printedExpectedOutput += '[Expected]\n' + expectedOutputs[i] + '\n'
 
-                                                                        
-            print()
-            if '\n' in item[0]:
-                #for multi-line output, start the output on a new line
-                print('[source',i,']')
-                print(item[0], printedExpectedSource)
-            else:
-                #for single line output, print everythin on one line
-                print('[source',i,']', item[0], printedExpectedSource)
-                
-            if '\n' in item[1]:
-                #for multi-line output, start the output on a new line
-                print('[output',i,']')
-                print(item[1], printedExpectedOutput)
-            else:
-                #for single line output, print everythin on one line
-                print('[output',i,']', item[1], printedExpectedOutput)
+#def makeColumns(texts, widths, separator='|'):
 
+            sourceStr += '[source ' + str(i) + ']\n'   
+            sourceStr += item[0] + '\n'
+        
+            outputStr += '[output ' + str(i) + ']\n'
+            outputStr += item[1] + '\n'
+            
             i += 1
 
+            x = makeColumns([sourceStr, printedExpectedSource, outputStr, printedExpectedOutput], [30, 30, 30, 30])
+            print(x, end='')
+        
         if NumQuestions == 0:
             grades.append(str(nameAndDir[0]) + ' : ')
         else:
-            grades.append(str(nameAndDir[0]) + ' : ' + str(100*grade/NumQuestions))
+            grades.append(str(nameAndDir[0]) + ' : ' + str(grade) + '/' + str(NumQuestions) + ' = ' + str(100*grade/NumQuestions))
         print(grades[-1])  #print the last grades[] entry
         print() 
-        print('-----------------------------------------')
 
     #print a summary
     print()
