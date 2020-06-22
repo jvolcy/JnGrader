@@ -3,7 +3,7 @@ import JnGrader
 def main():
     
     # baseHomeDir='/home', 
-    notebookPath = 'Current-Course-Materials/assignments/D0113.02-dual-operand_math_1/D0113.02-dual-operand_math_1.ipynb'
+    notebookPath = 'Current-Course-Materials/assignments/Dxxx/Dxxx.ipynb'
     compareSources = False    #always a string
     compareOutputs = False
     outputType = str    #set to int, float or str (matters only if comparing outputs)
@@ -24,7 +24,6 @@ def main():
                           expectedOutputs = expectedOutputs,
                           # studentIDsFile = studentIDsFile
                             )
-    
-           
-main()
 
+         
+main()

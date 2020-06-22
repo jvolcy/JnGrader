@@ -126,7 +126,7 @@ def getNotebookSourceAndOutput(noteBookPath):
 
 def main():
     #specify the location of the home directories
-    HOME_DIRS = 'home'
+    HOME_DIRS = '/home'
     D0103_01_expectedOutputs = ['Q1_Ans = 3', 'Q2_Ans = 6', 'Q3_Ans = 2', 'Q4_Ans = 7', 'Q5_Ans = 6', 'Q6_Ans = 7', 'Q7_Ans = 3', 'Q8_Ans = 8', 'Q9_Ans = 1', 'Q10_Ans = 4']
 
     expectedOutput = D0103_01_expectedOutputs
